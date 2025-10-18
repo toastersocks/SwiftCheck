@@ -165,27 +165,33 @@ public func <- (checker : AssertiveQuickCheck, test : @autoclosure @escaping () 
         let message = "\(reason); Replay with \(seed) and size \(sz)"
 
         XCTFail(message, file: checker.file, line: checker.line)
+        #if swift(>=6.0) && canImport(Testing)
         Issue.record("\(message)",
                      sourceLocation: SourceLocation(fileID: String(describing: checker.file),
                                                     filePath: String(describing: checker.file),
                                                     line: Int(checker.line), column: 1)
         )
+        #endif
 	case let .noExpectedFailure(_, seed, sz, _, _):
         let message = "Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)"
         XCTFail(message, file: checker.file, line: checker.line)
+        #if swift(>=6.0) && canImport(Testing)
         Issue.record("\(message)",
                      sourceLocation: SourceLocation(fileID: String(describing: checker.file),
                                                     filePath: String(describing: checker.file),
                                                     line: Int(checker.line), column: 1)
                 )
+        #endif
 	case let .insufficientCoverage(_, seed, sz, _, _):
         let message = "Property coverage insufficient.  Replay with \(seed) and size \(sz)"
         XCTFail(message, file: checker.file, line: checker.line)
+        #if swift(>=6.0) && canImport(Testing)
         Issue.record("\(message)",
                      sourceLocation: SourceLocation(fileID: String(describing: checker.file),
                                                     filePath: String(describing: checker.file),
                                                     line: Int(checker.line), column: 1)
                         )
+        #endif
 	default: ()
 	}
 }
@@ -196,27 +202,33 @@ public func <- (checker : AssertiveQuickCheck, test : () -> Testable) {
 	case let .failure(_, _, seed, sz, reason, _, _):
         let message = "\(reason); Replay with \(seed) and size \(sz)"
 		XCTFail(message, file: checker.file, line: checker.line)
+        #if swift(>=6.0) && canImport(Testing)
         Issue.record("\(message)",
                      sourceLocation: SourceLocation(fileID: String(describing: checker.file),
                                                     filePath: String(describing: checker.file),
                                                     line: Int(checker.line), column: 1)
         )
+        #endif
 	case let .noExpectedFailure(_, seed, sz, _, _):
         let message = "Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)"
 		XCTFail(message, file: checker.file, line: checker.line)
+        #if swift(>=6.0) && canImport(Testing)
         Issue.record("\(message)",
                      sourceLocation: SourceLocation(fileID: String(describing: checker.file),
                                                     filePath: String(describing: checker.file),
                                                     line: Int(checker.line), column: 1)
         )
+        #endif
 	case let .insufficientCoverage(_, seed, sz, _, _):
         let message = "Property coverage insufficient.  Replay with \(seed) and size \(sz)"
 		XCTFail(message, file: checker.file, line: checker.line)
+        #if swift(>=6.0) && canImport(Testing)
         Issue.record("\(message)",
                      sourceLocation: SourceLocation(fileID: String(describing: checker.file),
                                                     filePath: String(describing: checker.file),
                                                     line: Int(checker.line), column: 1)
         )
+        #endif
 	default: ()
 	}
 }
@@ -393,4 +405,6 @@ public func ^||^ (p1 : Testable, p2 : Testable) -> Property {
 }
 
 import XCTest
+#if swift(>=6.0) && canImport(Testing)
 import Testing
+#endif
