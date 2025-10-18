@@ -100,16 +100,40 @@ extension StdGen : Equatable, CustomStringConvertible {
 	}
 }
 
-private actor TheStdGen {
-    static var shared : StdGen = mkStdRNG(0)
+#if compiler(>=6.0) && canImport(Synchronization)
+import Synchronization
 
-}
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, *)
+private let sharedGenMutex = Mutex(mkStdRNG(0))
+#endif
+
+import Foundation
+
+private let lock = NSLock()
+
+#if compiler(>=6.0)
+nonisolated(unsafe) private var sharedGen: StdGen = mkStdRNG(0)
+#else
+private var sharedGen: StdGen = mkStdRNG(0)
+#endif
 
 /// A library-provided standard random number generator.
 public func newStdGen() -> StdGen {
-    let (left, right) = TheStdGen.shared.split
-    TheStdGen.shared = left
-	return right
+    #if compiler(>=6.0) && canImport(Synchronization)
+    if #available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, *) {
+        return sharedGenMutex.withLock { gen in
+            let (left, right) = gen.split
+            gen = left
+            return right
+        }
+    }
+    #endif
+
+    lock.lock()
+    defer { lock.unlock() }
+    let (left, right) = sharedGen.split
+    sharedGen = left
+    return right
 }
 
 /// Types that can generate random versions of themselves.
